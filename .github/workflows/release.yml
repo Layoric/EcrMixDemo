@@ -66,8 +66,8 @@ jobs:
           HOST_DOMAIN: ${{ env.domain }}
           LETSENCRYPT_EMAIL: ${{ env.letsencrypt_email }}
         with:
-          input: deploy/task-definition-template.yml
-          output: deploy/task-definition.yml
+          input: deploy/task-definition-template.json
+          output: deploy/task-definition.json
 
 #      - name: Register task definition
 #
