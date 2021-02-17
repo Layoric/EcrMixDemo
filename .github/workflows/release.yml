@@ -72,11 +72,8 @@ jobs:
 
       - name: Register task definition
         run: |
-          cat deploy/task-definition.json
           cp deploy/task-definition.json ./task-definition.json
-          cat ${{ github.workspace }}/task-definition.json
-          chmod 777 ${{ github.workspace }}/task-definition.json
-          aws ecs register-task-definition --cli-input-json file://${{ github.workspace }}/task-definition.json
+          cat ./task-definition.json | xargs -0 aws ecs register-task-definition --cli-input-json
 
       - name: Create ECS Service if not exists.
         env:
