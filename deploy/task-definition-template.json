@@ -1,5 +1,5 @@
 {
-  "family": "${IMAGE_REPO}",
+  "family": "${APP_NAME}",
   "requiresCompatibilities": [
     "EC2"
   ],
@@ -34,7 +34,7 @@
       "image": "${IMAGE_URL}",
       "essential": true,
       "links": ["webproxy:webproxy"],
-      "name": "${IMAGE_REPO}"
+      "name": "${APP_NAME}"
     }
   ]
 }
