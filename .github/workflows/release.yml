@@ -70,13 +70,10 @@ jobs:
           input: deploy/task-definition-template.json
           output: deploy/task-definition.json
 
-      - name: Register task definition
-        run: |
-          cp deploy/task-definition.json ./task-definition.json
-          chmod 777 ./task-definition.json
-          ls -l
-          aws --version
-          aws ecs register-task-definition --cli-input-json file://./task-definition.json
+      - name: Deploy to Amazon ECS
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: task-definition.json
 
       - name: Create ECS Service if not exists.
         env:
