@@ -47,7 +47,8 @@ jobs:
       - name: Output image url
         id: vars
         run: |
-          echo ::set-output name=image_url::${{ steps.login_ecr.outputs.registry }}/${{ env.image_repository_name }}:${{ github.event.release.tag_name }}
+          echo "${{ steps.login_ecr.outputs.registry }}/${{ env.image_repository_name }}:${{ github.event.release.tag_name }}"
+          echo "::set-output name=image_url::${{ steps.login_ecr.outputs.registry }}/${{ env.image_repository_name }}:${{ github.event.release.tag_name }}"
 
   deploy_ecs:
     needs: push_to_ecr
