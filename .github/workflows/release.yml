@@ -6,7 +6,7 @@ jobs:
   push_to_ecr:
     runs-on: ubuntu-20.04
     outputs:
-      image_url: ${{ steps.push_image_to_ecr.outputs.digest }}
+      repo_base: ${{ steps.login-ecr.outputs.registry }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -71,7 +71,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ github.event.release.tag_name }}
           APP_NAME: ${{ env.app_name }}
-          IMAGE_URL: ${{ needs.push_to_ecr.outputs.image_url }}
+          IMAGE_URL: ${{ needs.push_to_ecr.outputs.repo_base }}/${{ env.image_repository_name }}:${{ github.event.release.tag_name }}
           HOST_DOMAIN: ${{ env.domain }}
           LETSENCRYPT_EMAIL: ${{ env.letsencrypt_email }}
         with:
