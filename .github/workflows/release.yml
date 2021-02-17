@@ -73,7 +73,9 @@ jobs:
       - name: Register task definition
         run: |
           cp deploy/task-definition.json ./task-definition.json
+          chmod 777 ./task-definition.json
           ls -l
+          aws --version
           aws ecs register-task-definition --cli-input-json file://./task-definition.json
 
       - name: Create ECS Service if not exists.
