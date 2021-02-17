@@ -69,8 +69,14 @@ jobs:
         with:
           input: deploy/task-definition-template.json
           output: deploy/task-definition.json
+          
+      - name: Check if task definition exists
+        run: |
+          aws ecs describe-task-definition --task-definition ${{ env.app_name }}
+          echo "task_def_exists=$?" >> $GITHUB_ENV
 
-      - name: Deploy to Amazon ECS
+      - name: Create task definition if missing
+        if: task_def_exists >= 1
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: task-definition.json
@@ -79,12 +85,16 @@ jobs:
         env:
           SERVICE_NAME: ${{ env.image_repository_name }}
           AWS_ECS_CLUSTER: ${{ secrets.AWS_ECS_CLUSTER }}
-          APP_NAME: ${{ env.image_repository_name }}
+          APP_NAME: ${{ env.app_name }}
         run: |
           aws ecs describe-services --cluster ${AWS_ECS_CLUSTER} --services ${SERVICE_NAME} || aws ecs create-service --cluster ${AWS_ECS_CLUSTER} --service-name ${SERVICE_NAME} --task-definition ${APP_NAME}
 
-#      - name: Register task definition
-#
-#
-#      - name: Deploy task to ECS
-
+      - name: Deploy new revision of the task definition
+        if: task_def_exists >= 1
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        env:
+          SERVICE_NAME: ${{ env.image_repository_name }}
+          APP_NAME: ${{ env.app_name }}
+        with:
+          task-definition: task-definition.json
+          service: ${{ env.app_name }}
