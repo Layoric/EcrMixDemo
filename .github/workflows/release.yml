@@ -77,16 +77,9 @@ jobs:
           input: deploy/task-definition-template.json
           output: deploy/task-definition.json
           
-      - name: Check if task definition exists
+      - name: Create task definition if doesn't exist
         run: |
-          aws ecs describe-task-definition --task-definition ${{ env.app_name }}
-          echo "task_def_exists=$?" >> $GITHUB_ENV
-
-      - name: Create task definition if missing
-        if: env.task_def_exists >= 1
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: task-definition.json
+          aws ecs describe-task-definition --task-definition ${{ env.app_name }} || aws ecs register-task-definition --cli-input-json file://deploy/task-definition.json
 
       - name: Create ECS Service if not exists.
         env:
