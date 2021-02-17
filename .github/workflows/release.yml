@@ -87,7 +87,7 @@ jobs:
           AWS_ECS_CLUSTER: ${{ secrets.AWS_ECS_CLUSTER }}
           APP_NAME: ${{ env.app_name }}
         run: |
-          aws ecs describe-services --cluster ${AWS_ECS_CLUSTER} --services ${SERVICE_NAME} || aws ecs create-service --cluster ${AWS_ECS_CLUSTER} --service-name ${SERVICE_NAME} --task-definition ${APP_NAME}
+          aws ecs describe-services --cluster ${AWS_ECS_CLUSTER} --services ${SERVICE_NAME} | jq '.services[0]' -e || aws ecs create-service --cluster ${AWS_ECS_CLUSTER} --service-name ${SERVICE_NAME} --task-definition ${APP_NAME}
 
       - name: Deploy new revision of the task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
