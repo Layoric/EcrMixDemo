@@ -76,7 +76,7 @@ jobs:
           echo "task_def_exists=$?" >> $GITHUB_ENV
 
       - name: Create task definition if missing
-        if: task_def_exists >= 1
+        if: env.task_def_exists >= 1
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         with:
           task-definition: task-definition.json
@@ -90,7 +90,6 @@ jobs:
           aws ecs describe-services --cluster ${AWS_ECS_CLUSTER} --services ${SERVICE_NAME} || aws ecs create-service --cluster ${AWS_ECS_CLUSTER} --service-name ${SERVICE_NAME} --task-definition ${APP_NAME}
 
       - name: Deploy new revision of the task definition
-        if: env.task_def_exists >= 1
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
         env:
           SERVICE_NAME: ${{ env.image_repository_name }}
