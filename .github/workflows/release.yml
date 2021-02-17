@@ -56,12 +56,13 @@ jobs:
           echo "image_repository_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
           echo "domain=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_ENV
           echo "letsencrypt_email=${{ secrets.LETSENCRYPT_EMAIL }}" >> $GITHUB_ENV
+          echo "app_name=$(echo ${image_repository_name} | cut -d'/' -f2)" >> $GITHUB_ENV
           
       - name: Populate task definition template
         uses: danielr1996/envsubst-action@1.0.0
         env:
           RELEASE_VERSION: ${{ github.event.release.tag_name }}
-          APP_NAME: ${{ env.image_repository_name }}
+          APP_NAME: ${{ env.app_name }}
           IMAGE_URL: ${{ needs.push_to_ecr.outputs.image_url }}
           HOST_DOMAIN: ${{ env.domain }}
           LETSENCRYPT_EMAIL: ${{ env.letsencrypt_email }}
@@ -71,7 +72,9 @@ jobs:
 
       - name: Register task definition
         run: |
-          aws ecs register-task-definition --cli-input-json file://deploy/task-definition.json
+          cat deploy/task-definition.json
+          cp deploy/task-definition.json ./task-definition.json
+          aws ecs register-task-definition --cli-input-json file://task-definition.json
 
       - name: Create ECS Service if not exists.
         env:
