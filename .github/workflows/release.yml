@@ -12,8 +12,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run dotnet publish
-        run: |
-          dotnet publish ./EcrMixDemo/ -o publish -c release
+        run: dotnet publish ./EcrMixDemo/ -o publish -c release
 
       - name: repository name fix
         run: echo "image_repository_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
@@ -32,9 +31,8 @@ jobs:
       - name: Create ECR repo if not exists.
         env:
           ECR_REPOSITORY: ${{ env.image_repository_name }}
-        run: |
-          aws ecr describe-repositories --repository-names ${ECR_REPOSITORY} || \
-            aws ecr create-repository --repository-name ${ECR_REPOSITORY}
+        run: aws ecr describe-repositories --repository-names ${ECR_REPOSITORY} || \
+          aws ecr create-repository --repository-name ${ECR_REPOSITORY}
 
       - name: Build and push to ECR
         id: push_image_to_ecr
@@ -84,13 +82,12 @@ jobs:
           output: deploy/task-definition.json
           
       - name: Create task definition if doesn't exist
-        run: |
-          aws ecs describe-task-definition --task-definition ${{ env.app_name }} || aws ecs register-task-definition --cli-input-json file://deploy/task-definition.json
+        run: aws ecs describe-task-definition --task-definition ${{ env.app_name }} || \
+          aws ecs register-task-definition --cli-input-json file://deploy/task-definition.json
 
       - name: Create ECS Service if not exists.
-        run: |
-          aws ecs describe-services --cluster ${{ env.cluster_name }} --services ${{ env.app_name }} | jq '.services[0]' -e || \
-            aws ecs create-service --cluster ${{ env.cluster_name }} --service-name ${{ env.app_name }} --task-definition ${{ env.app_name }} --desired-count 1
+        run: aws ecs describe-services --cluster ${{ env.cluster_name }} --services ${{ env.app_name }} | jq '.services[0]' -e || \
+          aws ecs create-service --cluster ${{ env.cluster_name }} --service-name ${{ env.app_name }} --task-definition ${{ env.app_name }} --desired-count 1
 
       - name: Deploy new revision of the task definition
         uses: aws-actions/amazon-ecs-deploy-task-definition@v1
