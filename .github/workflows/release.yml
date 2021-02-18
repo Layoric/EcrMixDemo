@@ -43,18 +43,6 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.login_ecr.outputs.registry }}/${{ env.image_repository_name }}:${{ github.event.release.tag_name }}
-          
-      - name: Output image url
-        run: |
-          echo "${{ steps.login_ecr.outputs.registry }}/${{ env.image_repository_name }}:${{ github.event.release.tag_name }}"
-          echo "image_full_url=${{ steps.login_ecr.outputs.registry }}/${{ env.image_repository_name }}:${{ github.event.release.tag_name }}" >> $GITHUB_ENV
-        
-      - name: Assign image url
-        id: vars
-        run: |
-          echo ${{ env.image_full_url }}
-          echo "${{ env.image_full_url }}"
-          echo "::set-output name=image_url::${{ env.image_full_url }}"
 
   deploy_ecs:
     needs: push_to_ecr
@@ -62,24 +50,27 @@ jobs:
     steps:
       - name: checkout
         uses: actions/checkout@v2
-
-      - name: Repository name fix and env values setup
-        run: |
-          echo "image_repository_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
-          echo "domain=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_ENV
-          echo "letsencrypt_email=${{ secrets.LETSENCRYPT_EMAIL }}" >> $GITHUB_ENV
-          echo "app_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' | cut -d'/' -f2)" >> $GITHUB_ENV
-          echo "cluster_name=${{ secrets.AWS_ECS_CLUSTER }}" >> $GITHUB_ENV
-          echo "${{ needs.push_to_ecr.outputs.image_url }}"
-          echo "${{join(needs.push_to_ecr.*,'\n')}}"
-          echo "image_url=${{ needs.push_to_ecr.outputs.image_url }}" >> $GITHUB_ENV
           
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}    
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login_ecr
+        uses: aws-actions/amazon-ecr-login@v1  
+        
+      - name: Repository name fix and env values setup
+        run: |
+          echo "image_repository_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+          echo ${{ env.image_repository_name }}
+          echo "domain=${{ secrets.DEPLOY_HOST }}" >> $GITHUB_ENV
+          echo "letsencrypt_email=${{ secrets.LETSENCRYPT_EMAIL }}" >> $GITHUB_ENV
+          echo "app_name=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]' | cut -d'/' -f2)" >> $GITHUB_ENV
+          echo "cluster_name=${{ secrets.AWS_ECS_CLUSTER }}" >> $GITHUB_ENV
+          echo "image_url=${{ steps.login_ecr.outputs.registry }}/$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]'):${{ github.event.release.tag_name }}" >> $GITHUB_ENV
       
       - name: Populate task definition template
         uses: danielr1996/envsubst-action@1.0.0
