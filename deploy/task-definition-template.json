@@ -20,6 +20,10 @@
           "value": "${HOST_DOMAIN}"
         },
         {
+          "name": "LETSENCRYPT_HOST",
+          "value": "${HOST_DOMAIN}"
+        },
+        {
           "name": "LETSENCRYPT_EMAIL",
           "value": "${LETSENCRYPT_EMAIL}"
         },
