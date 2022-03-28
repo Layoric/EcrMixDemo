@@ -31,8 +31,7 @@ jobs:
       - name: Create ECR repo if not exists.
         env:
           ECR_REPOSITORY: ${{ env.image_repository_name }}
-        run: aws ecr describe-repositories --repository-names ${ECR_REPOSITORY} || \
-          aws ecr create-repository --repository-name ${ECR_REPOSITORY}
+        run: aws ecr describe-repositories --repository-names ${ECR_REPOSITORY} || aws ecr create-repository --repository-name ${ECR_REPOSITORY}
 
       - name: Build and push to ECR
         id: push_image_to_ecr
